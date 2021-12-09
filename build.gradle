@@ -22,9 +22,7 @@ dependencies {
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
     testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
-    testImlementation 'io.rest-assured:rest-assured:4.3.0'
-    testImlementation 'com.google.code.gson:gson:2.8.6'
-
+   
 }
 
 test {
