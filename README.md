@@ -1,5 +1,8 @@
 # Patterns task one
 
+[![Build status](https://ci.appveyor.com/api/projects/status/4brcfc7c6pt71il1?svg=true)](https://ci.appveyor.com/project/PerochenkoVA/petterns)
+
+
 
 Вам необходимо автоматизировать тестирование новой функции формы заказа доставки карты:
 
