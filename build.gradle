@@ -1,0 +1,33 @@
+plugins {
+    id 'java'
+}
+
+group 'ru.netology.auto'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    implementation group: 'com.codeborne', name: 'selenide', version: '6.0.3'
+    compileJava.options.encoding = 'UTF-8'
+    compileTestJava.options.encoding = 'UTF-8'
+    implementation group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2'
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
+
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
+    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
+    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
+    testImlementation 'io.rest-assured:rest-assured:4.3.0'
+    testImlementation 'com.google.code.gson:gson:2.8.6'
+
+}
+
+test {
+    useJUnitPlatform()
+
+}
