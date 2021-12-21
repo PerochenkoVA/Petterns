@@ -1,95 +1,99 @@
 package ru.netology.auto;
 
-import com.github.javafaker.CreditCardType;
-import com.github.javafaker.Faker;
+import com.codeborne.selenide.Condition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Keys;
-
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
+import ru.netology.auto.data.GenPatern;
+import ru.netology.auto.data.RegistrationByCardInfo;
 
 import static com.codeborne.selenide.Condition.exactText;
-import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selectors.withText;
-import static com.codeborne.selenide.Selenide.*;
+import static com.codeborne.selenide.Selenide.$;
+import static com.codeborne.selenide.Selenide.open;
+import static ru.netology.auto.data.GenPatern.Registration.citiesValid;
+import static ru.netology.auto.data.GenPatern.Registration.generateDate;
 
-public class DeliveryCard {
+public class DeliveryCardTest {
+    RegistrationByCardInfo info = GenPatern.Registration.generate("ru");
 
-    LocalDate date = LocalDate.now().plusDays(5);
-    LocalDate date1 = LocalDate.now();
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-    private Faker faker;
 
-    String generateDate(int days, String datePattern) {
-        return LocalDate.now().plusDays(days).format(DateTimeFormatter.ofPattern(datePattern));
-    }
 
     @BeforeEach
-    void setUpAll() {
-        faker = new Faker(new Locale("ru"));
+    void setUp() {
+        open("http://localhost:9999");
     }
 
     @Test
-    void taskOne() {
-        String name = faker.name().fullName();
-        String phone = faker.phoneNumber().subscriberNumber(10);
-        String cardNumber = faker.finance().creditCard(CreditCardType.VISA);
-        String city = faker.address().city();
-        open("http://localhost:9999/");
-        $("[data-test-id=city] input").setValue(city); //город
-        $("[data-test-id=date] input").doubleClick(); //очитка поля дата
-        $("[data-test-id=date] input").sendKeys(" "); //дата
-        $("[data-test-id=date] input").sendKeys(formatter.format(date)); //дата
-        $("[data-test-id=name] input").setValue(name); // FIO
-        $("[data-test-id=phone] input").setValue("+7" + phone); // telefon number
-        $("[data-test-id=agreement]").click(); //согласие
-        $("[class='button__content']").click(); //Продолжить
-        $(withText("Успешно")).shouldBe(visible, Duration.ofSeconds(50));
+    void shouldSuccessTest() {
+        $("[data-test-id='city'] input").setValue(citiesValid());
+        $("[data-test-id='date'] input").doubleClick().sendKeys(Keys.BACK_SPACE);
+        $("[data-test-id='date'] input").setValue(generateDate(4));
+        $("[data-test-id='name'] input").setValue(info.getName());
+        $("[data-test-id='phone'] input").setValue(info.getPhoneNumber());
+        $("[class=checkbox__box]").click();
+        $("[class=button__text]").click();
+        $(withText("Успешно!")).shouldBe(Condition.appear);
+        $(".notification__content").shouldHave(exactText("Встреча успешно запланирована на " + generateDate(4)));
+        $("[data-test-id='date'] input").doubleClick().sendKeys(Keys.BACK_SPACE);
+        $("[data-test-id='date'] input").sendKeys(generateDate(6));
+        $(withText("Запланировать")).click();
+        $("[data-test-id='replan-notification'] .notification__title").shouldBe(Condition.appear);
+        $(withText("Перепланировать")).click();
+        $(".notification__content").shouldHave(exactText("Встреча успешно запланирована на " + generateDate(6)));
+
 
     }
-
     @Test
-    void taskTwo() {
-
-        String name = faker.name().fullName();
-        String phone = faker.phoneNumber().subscriberNumber(10);
-        String cardNumber = faker.finance().creditCard(CreditCardType.VISA);
-        String city = faker.address().city();
-        open("http://localhost:9999/");
-        $("[data-test-id=city] input").setValue(city); //город
-        $("[data-test-id=date] input").doubleClick().sendKeys(Keys.BACK_SPACE); //очитка поля дата
-        $("[data-test-id=date] input").setValue(formatter.format(date1)); //дата
-        $("[data-test-id=name] input").setValue(name); // ФИО
-        $("[data-test-id=phone] input").setValue("+7" + phone); // telefon number
-        $("[data-test-id=agreement]").click(); //согласие
-        $("[class='button__content']").click(); //Продолжить
-        $(withText("Заказ на выбранную дату невозможен")).shouldBe(visible);
-
+    void emptyCityField() {
+        $("[data-test-id='date'] input").doubleClick().sendKeys(Keys.BACK_SPACE);
+        $("[data-test-id='date'] input").sendKeys(generateDate(4));
+        $("[data-test-id='name'] input").setValue(info.getName());
+        $("[data-test-id='phone'] input").setValue(info.getPhoneNumber());
+        $("[class=checkbox__box]").click();
+        $("[class=button__text]").click();
+        $("[data-test-id='city'].input_invalid .input__sub").shouldHave(Condition.text("Поле обязательно для заполнения"));
     }
-
-
     @Test
-    void shouldSendValidForm() {
-
-        String name = faker.name().fullName();
-        String phone = faker.phoneNumber().subscriberNumber(10);
-        String cardNumber = faker.finance().creditCard(CreditCardType.VISA);
-        String city = faker.address().city();
-        open("http://localhost:9999/");
-        $("[data-test-id=city] input").setValue(city);
-        $("[data-test-id=date] input").doubleClick().sendKeys(Keys.BACK_SPACE);
-        String planningDate = generateDate(4, "dd.MM.yyyy");
-        $("[data-test-id=date] input").setValue(planningDate);
-        $("[data-test-id=name] input").setValue(name);
-        $("[data-test-id=phone] input").setValue("+7" + phone);
-        $("[data-test-id=agreement]").click();
-        $$("button").find(exactText("Забронировать")).click();
-        $(withText("Успешно")).shouldBe(visible, Duration.ofSeconds(15));
-        $(".notification__content").shouldBe(visible)
-                .shouldHave(exactText("Встреча успешно забронирована на " + planningDate));
+    void emptyNameField() {
+        $("[data-test-id='city'] input").setValue(citiesValid());
+        $("[data-test-id='date'] input").doubleClick().sendKeys(Keys.BACK_SPACE);
+        $("[data-test-id='date'] input").sendKeys(generateDate(4));
+        $("[data-test-id='phone'] input").setValue(info.getPhoneNumber());
+        $("[class=checkbox__box]").click();
+        $("[class=button__text]").click();
+        $("[data-test-id='name'].input_invalid .input__sub").shouldHave(Condition.text("Поле обязательно для заполнения"));
     }
+    @Test
+    void emptyPhoneField() {
+        $("[data-test-id='city'] input").setValue(citiesValid());
+        $("[data-test-id='date'] input").doubleClick().sendKeys(Keys.BACK_SPACE);
+        $("[data-test-id='date'] input").sendKeys(generateDate(4));
+        $("[data-test-id='name'] input").setValue(info.getName());
+        $("[class=checkbox__box]").click();
+        $("[class=button__text]").click();
+        $("[data-test-id='phone'].input_invalid .input__sub").shouldHave(Condition.text("Поле обязательно для заполнения"));
+    }
+    @Test
+    void emptyDateField() {
+        $("[data-test-id='city'] input").setValue(citiesValid());
+        $("[data-test-id='date'] input").doubleClick().sendKeys(Keys.BACK_SPACE);
+        $("[data-test-id='name'] input").setValue(info.getName());
+        $("[data-test-id='phone'] input").setValue(info.getPhoneNumber());
+        $("[class=checkbox__box]").click();
+        $("[class=button__text]").click();
+        $("[data-test-id='date'] .input_invalid .input__sub").shouldHave(Condition.text("Неверно введена дата"));
+    }
+    @Test
+    void citiesNotValid(){
+        $("[data-test-id='city'] input").setValue(GenPatern.Registration.citiesNotValid());
+        $("[data-test-id='date'] input").doubleClick().sendKeys(Keys.BACK_SPACE);
+        $("[data-test-id='date'] input").setValue(generateDate(4));
+        $("[data-test-id='name'] input").setValue(info.getName());
+        $("[data-test-id='phone'] input").setValue(info.getPhoneNumber());
+        $("[class=checkbox__box]").click();
+        $("[class=button__text]").click();
+        $("[data-test-id='city'] .input__sub").shouldHave(Condition.text("Доставка в выбранный город недоступна"));
 
+    }
 }
